@@ -1,0 +1,22 @@
+{
+    "debug": true,
+    "http": {
+        "listen": "0.0.0.0:4000",
+        "token": ""
+    },
+    "smtp": {
+        "enable": false,
+        "tls": false,
+        "addr": "",
+        "username": "",
+        "password": "",
+        "from": ""
+    },
+    "wechat": {
+        "enable": false,
+        "corpid": "",
+        "agentid": "",
+        "secret": "",
+        "aeskey": ""
+    }
+}
