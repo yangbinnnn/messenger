@@ -143,7 +143,7 @@ func (wechat Wechat) GetAccessTokenFromWeixin() {
 			TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
 			DisableCompression: true,
 		}
-		client := &http.Client{Transport: tr}
+		client := &http.Client{Transport: tr, Timeout: time.Duration(wechat.Timeout) * time.Second}
 		result, err := client.Get(WxAccessTokenUrl)
 		if err != nil {
 			log.Printf("获取微信 Token 返回数据错误: %v, 10秒后重试!", err)
@@ -188,7 +188,8 @@ func (wechat Wechat) WxPost(url string, data MsgPost) (string, error) {
 		return "", err
 	}
 
-	r, err := http.Post(url, "application/json;charset=utf-8", bytes.NewReader(jsonBody))
+	client := &http.Client{Timeout: time.Duration(wechat.Timeout) * time.Second}
+	r, err := client.Post(url, "application/json;charset=utf-8", bytes.NewReader(jsonBody))
 	if err != nil {
 		return "", err
 	}
