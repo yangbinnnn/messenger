@@ -10,13 +10,15 @@
         "addr": "",
         "username": "",
         "password": "",
-        "from": ""
+        "from": "",
+        "timeout": 6
     },
     "wechat": {
         "enable": false,
         "corpid": "",
-        "agentid": "",
+        "agentid": 100002,
         "secret": "",
-        "aeskey": ""
+        "aeskey": "",
+        "timeout": 6
     }
 }

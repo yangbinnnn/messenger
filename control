@@ -12,6 +12,9 @@ localconf=cfg.local.json
 pidfile=var/app.pid
 logfile=var/app.log
 
+dist="dist"
+mkdir -p $dist
+
 function check_pid() {
     if [ -f $pidfile ];then
         pid=`cat $pidfile`
@@ -79,7 +82,7 @@ function build() {
 function pack() {
     build
     version=`./$app -v`
-    tar zcvf $app-$version.tar.gz control cfg.json $app
+    tar zcvf $dist/$app-$version.tar.gz control cfg.json $app
 }
 
 function packbin() {

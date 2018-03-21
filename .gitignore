@@ -15,8 +15,8 @@ debug
 .glide/
 
 # system env
-env
-
 .vscode
-
+env
 cfg.local.json
+dist
+messenger
