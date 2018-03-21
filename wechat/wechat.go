@@ -28,11 +28,12 @@ type Wechat struct {
 	Secret         string
 	EncodingAESKey string
 	TokenCache     *cache.Cache
+	Timeout        int
 }
 
-func NewWechat(CorpID string, AgentID int, Secret, EncodingAESKey string) Wechat {
+func NewWechat(CorpID string, AgentID int, Secret, EncodingAESKey string) *Wechat {
 	tc := cache.New(6000*time.Second, 5*time.Second)
-	return Wechat{CorpID: CorpID, AgentID: AgentID,
+	return &Wechat{CorpID: CorpID, AgentID: AgentID,
 		Secret: Secret, EncodingAESKey: EncodingAESKey, TokenCache: tc}
 }
 

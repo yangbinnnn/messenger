@@ -22,6 +22,7 @@ type SmtpConfig struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	From     string `json:"from"`
+	Timeout  int    `json:"timeout"`
 }
 
 type WechatConfig struct {
@@ -30,6 +31,7 @@ type WechatConfig struct {
 	AgentId        int    `json:"agentid"`
 	Secret         string `json:secret`
 	EncodingAESKEY string `json:aeskey`
+	Timeout        int    `json:"timeout"`
 }
 
 type GlobalConfig struct {
@@ -62,7 +64,7 @@ func FileIsExist(path string) bool {
 func FileString(path string) (string, error) {
 	bs, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return strings.TrimSpace(string(bs)), nil
 }
