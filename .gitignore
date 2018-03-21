@@ -15,3 +15,7 @@
 
 # system env
 env
+
+.vscode
+
+cfg.local.json

@@ -27,7 +27,7 @@ type SmtpConfig struct {
 type WechatConfig struct {
 	Enable         bool   `json:"enable"`
 	CorpID         string `json:"corpid"`
-	AgentId        string `json:"agentid"`
+	AgentId        int    `json:"agentid"`
 	Secret         string `json:secret`
 	EncodingAESKEY string `json:aeskey`
 }
