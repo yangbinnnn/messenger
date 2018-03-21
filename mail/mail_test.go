@@ -14,7 +14,7 @@ func TestEmail(t *testing.T) {
 	timeout := 60
 	insecure := false
 	from := username
-	tos := []string{username}
+	tos := []string{"yangbin@cloudhua.com"}
 	subject := "hello"
 	message := "email test"
 

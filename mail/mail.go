@@ -71,5 +71,6 @@ func (cli *Client) Send(tos []string, subject, message string) error {
 	if err != nil {
 		return err
 	}
-	return cli._client.Quit()
+	cli._client.Quit()
+	return nil
 }
