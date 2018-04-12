@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/labstack/echo"
 	"github.com/yangbinnnn/messenger/config"
 	"github.com/yangbinnnn/messenger/mail"
 	"github.com/yangbinnnn/messenger/wechat"
@@ -35,6 +36,8 @@ func main() {
 	}
 
 	config.Parse(*cfg)
+
+	app := echo.New()
 
 	mail.ConfigRoute()
 	wechat.ConfigRoute()
