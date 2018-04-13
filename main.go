@@ -14,9 +14,10 @@ import (
 	"github.com/yangbinnnn/messenger/handler"
 )
 
-// use echo
+// 0.0.2 use echo
+// 0.0.3 refactor handler and sender.mail
 const (
-	VERSION = "0.0.2"
+	VERSION = "0.0.3"
 )
 
 func prepare() {
@@ -58,5 +59,5 @@ func main() {
 	})
 	app.Match([]string{"GET", "POST"}, "/sender/mail", h.SendMail)
 	app.Match([]string{"GET", "POST"}, "/sender/wechat", h.SendWeChat)
-	app.Start(addr)
+	log.Fatal(app.Start(addr))
 }

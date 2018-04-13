@@ -18,11 +18,8 @@ func TestEmail(t *testing.T) {
 	subject := "hello"
 	message := "email test"
 
-	client, err := NewMailClient(addr, username, password, from, timeout, tls, insecure)
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = client.Send(tos, subject, message)
+	client := NewMailClient(addr, username, password, from, timeout, tls, insecure)
+	err := client.Send(tos, subject, message)
 	if err != nil {
 		t.Fatal(err)
 	}

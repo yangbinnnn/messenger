@@ -1,14 +1,14 @@
 package handler
 
 import (
-	"github.com/labstack/echo"
 	"github.com/yangbinnnn/messenger/g"
 	"github.com/yangbinnnn/messenger/sender"
 )
 
 type Handler struct {
-	cfg    *g.GlobalConfig
-	wechat *sender.Wechat
+	cfg     *g.GlobalConfig
+	wechat  *sender.Wechat
+	mailcli *sender.MailClient
 }
 
 func (h *Handler) Prepre() {
@@ -22,13 +22,15 @@ func (h *Handler) Prepre() {
 		)
 		go h.wechat.GetAccessTokenFromWeixin()
 	}
-}
-
-func (h *Handler) ParamString(c echo.Context, key string) string {
-	value := c.QueryParam(key)
-	if value != "" {
-		return value
+	if h.cfg.Smtp.Enable {
+		h.mailcli = sender.NewMailClient(
+			h.cfg.Smtp.Addr,
+			h.cfg.Smtp.Username,
+			h.cfg.Smtp.Password,
+			h.cfg.Smtp.From,
+			h.cfg.Smtp.Timeout,
+			h.cfg.Smtp.TLS,
+			false,
+		)
 	}
-	value = c.FormValue(key)
-	return value
 }
