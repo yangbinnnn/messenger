@@ -3,24 +3,24 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
 
 	"github.com/labstack/echo"
-	"github.com/yangbinnnn/messenger/config"
-	"github.com/yangbinnnn/messenger/mail"
-	"github.com/yangbinnnn/messenger/wechat"
+	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
+	"github.com/yangbinnnn/messenger/g"
+	"github.com/yangbinnnn/messenger/handler"
 )
 
+// use echo
 const (
-	VERSION = "0.0.1"
+	VERSION = "0.0.2"
 )
 
 func prepare() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }
 
 func main() {
@@ -35,22 +35,28 @@ func main() {
 		os.Exit(0)
 	}
 
-	config.Parse(*cfg)
+	g.Parse(*cfg)
 
 	app := echo.New()
+	app.Logger.SetLevel(log.ERROR)
+	app.Debug = g.Config().Debug
+	app.Use(middleware.Logger())
 
-	mail.ConfigRoute()
-	wechat.ConfigRoute()
-
-	addr := config.Config().Http.Listen
+	addr := g.Config().Http.Listen
 	if addr == "" {
 		return
 	}
 
-	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(VERSION))
-	})
+	h := &handler.Handler{}
+	h.Prepre()
 
-	log.Println("listen on", addr)
-	http.ListenAndServe(addr, nil)
+	app.GET("/version", func(c echo.Context) error {
+		return c.String(http.StatusOK, VERSION)
+	})
+	app.GET("/healthy", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
+	app.Match([]string{"GET", "POST"}, "/sender/mail", h.SendMail)
+	app.Match([]string{"GET", "POST"}, "/sender/wechat", h.SendWeChat)
+	app.Start(addr)
 }

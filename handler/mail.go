@@ -5,23 +5,21 @@ import (
 	"strings"
 
 	"github.com/labstack/echo"
-	"github.com/yangbinnnn/messenger/g"
 	"github.com/yangbinnnn/messenger/sender"
 )
 
 func (h *Handler) SendMail(c echo.Context) error {
-	cfg := config.Config()
-	if !cfg.Smtp.Enable {
+	if !h.cfg.Smtp.Enable {
 		return echo.NewHTTPError(http.StatusMethodNotAllowed)
 	}
 
 	client, err := sender.NewMailClient(
-		cfg.Smtp.Addr,
-		cfg.Smtp.Username,
-		cfg.Smtp.Password,
-		cfg.Smtp.From,
-		cfg.Smtp.Timeout,
-		cfg.Smtp.TLS,
+		h.cfg.Smtp.Addr,
+		h.cfg.Smtp.Username,
+		h.cfg.Smtp.Password,
+		h.cfg.Smtp.From,
+		h.cfg.Smtp.Timeout,
+		h.cfg.Smtp.TLS,
 		false,
 	)
 	if err != nil {
@@ -29,7 +27,7 @@ func (h *Handler) SendMail(c echo.Context) error {
 	}
 
 	token := h.ParamString(c, "token")
-	if token != cfg.Http.Token {
+	if token != h.cfg.Http.Token {
 		return echo.ErrForbidden
 	}
 
