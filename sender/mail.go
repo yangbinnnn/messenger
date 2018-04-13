@@ -9,58 +9,75 @@ import (
 	"time"
 )
 
-type Client struct {
+type MailClient struct {
 	addr     string
 	username string
 	password string
 	from     string
 	timeout  int
-	_client  *smtp.Client
+	tls      bool
+	insecure bool
 }
 
-func NewMailClient(addr, username, password, from string, timeout int, tls, insecure bool) (*Client, error) {
-	conn, err := net.DialTimeout("tcp", addr, time.Duration(timeout)*time.Second)
+func NewMailClient(addr, username, password, from string, timeout int, tls, insecure bool) *MailClient {
+	return &MailClient{
+		addr:     addr,
+		from:     from,
+		timeout:  timeout,
+		username: username,
+		password: password,
+		tls:      tls,
+		insecure: insecure,
+	}
+}
+
+func (cli MailClient) connect() (*smtp.Client, error) {
+	conn, err := net.DialTimeout("tcp", cli.addr, time.Duration(cli.timeout)*time.Second)
 	if err != nil {
 		return nil, err
 	}
-	host, _, err := net.SplitHostPort(addr)
+	host, _, err := net.SplitHostPort(cli.addr)
 	if err != nil {
 		return nil, err
 	}
-	if tls {
+	if cli.tls {
 		tlsConn := _tls.Client(conn, &_tls.Config{
 			ServerName:         host,
-			InsecureSkipVerify: insecure,
+			InsecureSkipVerify: cli.insecure,
 		})
 		if err = tlsConn.Handshake(); err != nil {
 			return nil, err
 		}
 		conn = tlsConn
 	}
-	_client, err := smtp.NewClient(conn, host)
+	client, err := smtp.NewClient(conn, host)
 	if err != nil {
 		return nil, err
 	}
-	if ok, _ := _client.Extension("AUTH"); ok {
-		err = _client.Auth(smtp.PlainAuth("", username, password, host))
+	if ok, _ := client.Extension("AUTH"); ok {
+		err = client.Auth(smtp.PlainAuth("", cli.username, cli.password, host))
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &Client{_client: _client, addr: addr, from: from, timeout: timeout, username: username, password: password}, nil
+	return client, nil
 }
 
-func (cli *Client) Send(tos []string, subject, message string) error {
-	defer cli._client.Close()
-	if err := cli._client.Mail(cli.from); err != nil {
+func (cli MailClient) Send(tos []string, subject, message string) error {
+	conn, err := cli.connect()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	if err := conn.Mail(cli.from); err != nil {
 		return err
 	}
 	for _, t := range tos {
-		if err := cli._client.Rcpt(t); err != nil {
+		if err := conn.Rcpt(t); err != nil {
 			return err
 		}
 	}
-	w, err := cli._client.Data()
+	w, err := conn.Data()
 	if err != nil {
 		return err
 	}
@@ -71,6 +88,6 @@ func (cli *Client) Send(tos []string, subject, message string) error {
 	if err != nil {
 		return err
 	}
-	cli._client.Quit()
+	conn.Quit()
 	return nil
 }
