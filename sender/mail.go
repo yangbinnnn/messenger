@@ -1,4 +1,4 @@
-package mail
+package sender
 
 import (
 	_tls "crypto/tls"
@@ -18,7 +18,7 @@ type Client struct {
 	_client  *smtp.Client
 }
 
-func NewClient(addr, username, password, from string, timeout int, tls, insecure bool) (*Client, error) {
+func NewMailClient(addr, username, password, from string, timeout int, tls, insecure bool) (*Client, error) {
 	conn, err := net.DialTimeout("tcp", addr, time.Duration(timeout)*time.Second)
 	if err != nil {
 		return nil, err
