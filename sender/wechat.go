@@ -49,6 +49,69 @@ type MsgPost struct {
 	Text    Content `json:"text"`
 }
 
+type GroupMsg struct {
+	ChatId  string  `json:"chatid"`
+	MsgType string  `json:"msgtype"`
+	Text    Content `json:"text"`
+}
+
+func (wechat Wechat) CreateChatGroup(name, owner, chatId string, userList []string) error {
+	token, found := wechat.TokenCache.Get("token")
+	if !found {
+		log.Printf("token获取失败!")
+		return errors.New("token获取失败!")
+	}
+	accessToken, ok := token.(AccessToken)
+	if !ok {
+		return errors.New("token解析失败!")
+	}
+
+	url := "https://qyapi.weixin.qq.com/cgi-bin/appchat/create?access_token=" + accessToken.AccessToken
+
+	data := make(map[string]interface{})
+	data["name"] = name
+	data["owner"] = owner
+	data["userlist"] = userList
+	data["chatid"] = chatId
+	result, err := wechat.WxPost(url, data)
+	if err != nil {
+		log.Printf("请求微信失败: %v", err)
+	}
+
+	log.Printf("创建讨论组: %s, 所有者: %s, ChatID: %s, 微信返回结果: %v", name, owner, chatId, result)
+	return nil
+}
+
+func (wechat Wechat) SendMsgToGroup(chatId, content string) error {
+	text := Content{}
+	text.Content = content
+
+	msg := GroupMsg{
+		ChatId:  chatId,
+		MsgType: "text",
+		Text:    text,
+	}
+
+	token, found := wechat.TokenCache.Get("token")
+	if !found {
+		log.Printf("token获取失败!")
+		return errors.New("token获取失败!")
+	}
+	accessToken, ok := token.(AccessToken)
+	if !ok {
+		return errors.New("token解析失败!")
+	}
+
+	url := "https://qyapi.weixin.qq.com/cgi-bin/appchat/send?access_token=" + accessToken.AccessToken
+
+	result, err := wechat.WxPost(url, msg)
+	if err != nil {
+		log.Printf("请求微信失败: %v", err)
+	}
+	log.Printf("发送信息给%s, 信息内容: %s, 微信返回结果: %v", chatId, content, result)
+	return nil
+}
+
 func (wechat Wechat) SendMsg(toUser, content string) error {
 	if userList := strings.Split(toUser, ","); len(userList) > 1 {
 		toUser = strings.Join(userList, "|")
@@ -182,7 +245,7 @@ func (wechat Wechat) GetAccessTokenFromWeixin() {
 }
 
 //微信请求数据
-func (wechat Wechat) WxPost(url string, data MsgPost) (string, error) {
+func (wechat Wechat) WxPost(url string, data interface{}) (string, error) {
 	jsonBody, err := encodeJson(data)
 	if err != nil {
 		return "", err

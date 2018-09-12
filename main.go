@@ -16,8 +16,9 @@ import (
 
 // 0.0.2 use echo
 // 0.0.3 refactor handler and sender.mail
+// 0.0.4 add weixin group msg
 const (
-	VERSION = "0.0.3"
+	VERSION = "0.0.4"
 )
 
 func prepare() {
@@ -59,5 +60,6 @@ func main() {
 	})
 	app.Match([]string{"GET", "POST"}, "/sender/mail", h.SendMail)
 	app.Match([]string{"GET", "POST"}, "/sender/wechat", h.SendWeChat)
+	app.Match([]string{"GET", "POST"}, "/sender/wechat/create", h.NewChatGroup)
 	log.Fatal(app.Start(addr))
 }
